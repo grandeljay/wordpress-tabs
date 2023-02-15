@@ -1,13 +1,13 @@
 <?php
 /**
- * WordPress Plugin Template
+ * Tabs
  *
- * @package           WordPressPluginTemplate
+ * @package           GrandelJayTabs
  * @author            Jay Trees <github.jay@grandel.anonaddy.me>
  *
  * @wordpress-plugin
- * Plugin Name:       WordPress Plugin Template
- * Description:       A WordPress starter plugin.
+ * Plugin Name:       Tabs
+ * Description:       Creates a shortcode which creates expandable tabs.
  * Version:           0.1.0
  * Requires at least: 6.1
  * Requires PHP:      8.0
