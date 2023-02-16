@@ -18,15 +18,21 @@
 
 namespace Grandeljay\Tabs;
 
-function shortcode_tab( $atts = array(), $content = null ) {
-	ob_start();
+/**
+ * Tab
+ *
+ * @param array  $atts
+ * @param [type] $content
+ *
+ * @return string
+ */
+function shortcode_tab( $atts = array(), $content = null ): string {
+	$content = get_clean( $content );
 
+	/**
+	 * Attributes
+	 */
 	$attributes = '';
-
-	if ( is_string( $content ) ) {
-		$content = trim( $content, '<p></p>' );
-		$content = trim( $content );
-	}
 
 	if ( ! empty( $atts ) ) {
 		foreach ( $atts as $key => $value ) {
@@ -42,22 +48,18 @@ function shortcode_tab( $atts = array(), $content = null ) {
 		}
 	}
 
-	if ( isset( $atts['summary'] ) ) {
-		$atts['summary'] = trim( $atts['summary'], '<p></p>' );
-		$atts['summary'] = trim( $atts['summary'] );
-	}
-
 	$attributes = trim( $attributes );
+
+	/**
+	 * Tab
+	 */
+	ob_start();
 	?>
 	<details <?php echo ( $attributes ); ?>>
-		<summary>
-			<?php echo $atts['summary'] ?? ''; ?>
-		</summary>
-		<div>
-			<?php echo $content ?? ''; ?>
-		</div>
+		<?php echo \do_shortcode( $content ); ?>
 	</details>
 	<?php
+
 	$tab = ob_get_clean();
 
 	return $tab;
@@ -65,6 +67,61 @@ function shortcode_tab( $atts = array(), $content = null ) {
 
 \add_shortcode( 'grandeljay_tab', __NAMESPACE__ . '\shortcode_tab' );
 
+/**
+ * Tab: Summary
+ *
+ * @param array  $atts
+ * @param [type] $content
+ *
+ * @return string
+ */
+function shortcode_tab_summary( $atts = array(), $content = null ): string {
+	$content = get_clean( $content );
+
+	ob_start();
+	?>
+	<summary>
+		<?php echo \do_shortcode( '[wpml-string context="grandeljay-tabs" name="' . hash( 'sha1', $content ) . '"]' . $content . '[/wpml-string]' ); ?>
+	</summary>
+	<?php
+
+	$summary = ob_get_clean();
+
+	return $summary;
+}
+
+\add_shortcode( 'grandeljay_summary', __NAMESPACE__ . '\shortcode_tab_summary' );
+
+/**
+ * Tab: Content
+ *
+ * @param array  $atts
+ * @param [type] $content
+ *
+ * @return string
+ */
+function shortcode_tab_content( $atts = array(), $content = null ): string {
+	$content = get_clean( $content );
+
+	ob_start();
+	?>
+	<div>
+		<?php echo \do_shortcode( '[wpml-string context="grandeljay-tabs" name="' . hash( 'sha1', $content ) . '"]' . $content . '[/wpml-string]' ); ?>
+	</div>
+	<?php
+
+	$html = ob_get_clean();
+
+	return $html;
+}
+
+\add_shortcode( 'grandeljay_content', __NAMESPACE__ . '\shortcode_tab_content' );
+
+/**
+ * Enqueue scripts and styles
+ *
+ * @return void
+ */
 function enqueue_scripts() {
 	$css_tabs = 'src/assets/css/tabs.css';
 
@@ -77,3 +134,27 @@ function enqueue_scripts() {
 }
 
 \add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
+
+/**
+ * Get clean
+ *
+ * @param null|string $content
+ *
+ * @return string
+ */
+function get_clean( null|string $content ): string {
+	if ( null === $content ) {
+		$content = '';
+	}
+
+	$content = preg_replace( '/\s+/', ' ', $content );
+	$content = trim( $content );
+
+	if ( '<p>' === substr( $content, 0, 3 ) || '</p>' === substr( $content, 0, 4 ) ) {
+		$content = trim( $content, '</p>' );
+	}
+
+	$content = str_replace( '<br />', '', $content );
+
+	return $content;
+}
